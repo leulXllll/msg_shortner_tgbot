@@ -18,13 +18,6 @@ bot.on('message', (msg) => {
 
   const now = new Date();
 
-  const day = now.getDate();           
-  const month = now.getMonth() + 1;    
-  const year = now.getFullYear(); 
-
-  const hour = now.getHours();         
-  const minute = now.getMinutes();     
-  const second = now.getSeconds();  
 
   let firstline = text.substring(text.indexOf("from"),text.indexOf(";"));
 
@@ -32,57 +25,48 @@ bot.on('message', (msg) => {
 
   let remaining = firstline.substring
   (firstline.indexOf("is")+2,firstline.lastIndexOf("with"));
-
   
   let packageYear = firstline.substring(firstline.indexOf(" on")+4,firstline.indexOf("-"));
-  let packageMonth = zeroNumberRemover(firstline.substring(firstline.indexOf(packageYear)+5,firstline.lastIndexOf("-")));
+  let packageMonth = firstline.substring(firstline.indexOf(packageYear)+5,firstline.lastIndexOf("-"));
   
-  let packageDay = zeroNumberRemover(firstline.substring(firstline.indexOf(packageMonth)+2,firstline.indexOf(packageMonth)+5));
+  let packageDay = firstline.substring(firstline.indexOf(packageMonth)+3,firstline.indexOf(packageMonth)+5);
   
-  let packageHour = zeroNumberRemover(firstline.substring(firstline.indexOf(" at ")+4,firstline.indexOf(":")));
-  let packageMinute = zeroNumberRemover(firstline.substring(firstline.indexOf(":")+1,firstline.lastIndexOf(":")));
-  let packageSecond = zeroNumberRemover(firstline.substring(firstline.lastIndexOf(":")+1,firstline.lastIndexOf(":")+3));
+  let packageHour = firstline.substring(firstline.indexOf(" at ")+4,firstline.indexOf(":"));
+  let packageMinute = firstline.substring(firstline.indexOf(":")+1,firstline.lastIndexOf(":"));
+  let packageSecond = firstline.substring(firstline.lastIndexOf(":")+1,firstline.lastIndexOf(":")+3);
   
 
-  let expiration = 0;
+  let packageDate = `${packageYear}-${packageMonth}-${packageDay}T${packageHour}:${packageMinute}:${packageSecond}`;
+  let expiration = getTimeLeftUntil(packageDate);
 
-  if(compareDates(
-    `${packageYear}/${packageMonth}/${packageDay}`,
-    `${year}/${month}/${day}`
-  )
- ){
-    expiration = "Package Expired";
-  }
-  
 
   bot.sendMessage(chatId,`Package : ${package} \n Remaning : ${remaining} \n Expiration : ${expiration}`)
  
 
 });
 
-function zeroNumberRemover(num){
-  let newNum = num
-    if(num[0]=="0"){
-      newNum = num[1]
+
+function getTimeLeftUntil(targetDateStr) {
+    const now = new Date();
+    const targetDate = new Date(targetDateStr);
+
+    const diffMs = targetDate - now;
+
+    if (diffMs <= 0) {
+        return "Package Expired";
     }
-    return newNum
+
+    const seconds = Math.floor((diffMs / 1000) % 60);
+    const minutes = Math.floor((diffMs / 1000 / 60) % 60);
+    const hours = Math.floor((diffMs / 1000 / 60 / 60) % 24);
+    const days = Math.floor(diffMs / 1000 / 60 / 60 / 24);
+
+    return `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds remaining`;
 }
 
-const compareDates = (d1, d2) => {
-  let date1 = new Date(d1).getTime();
-  let date2 = new Date(d2).getTime();
+// Example: time left until July 27, 2025
+console.log(getTimeLeftUntil("2025-07-27T04:03:30"));
 
-  if (date1 < date2) {
-    console.log(`${d1} is less than ${d2}`);
-    return true
-  } else if (date1 > date2) {
-    console.log(`${d1} is greater than ${d2}`);
-    return false
-  } else {
-    console.log(`Both dates are equal`);
-    return false
-  }
-};
 bot.on('polling_error',(err)=>{
     console.log('the error ois ',err)
 })
