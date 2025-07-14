@@ -14,35 +14,58 @@ bot.on('message', (msg) => {
 
   const chatId = msg.chat.id;
 
-  const text = msg.text;//user text
+  let text = msg.text;//user text
 
   const now = new Date();
 
-
-  let firstline = text.substring(text.indexOf("from"),text.indexOf(";"));
-
-  let package = firstline.substring(4,firstline.lastIndexOf("from"));
-
-  let remaining = firstline.substring
-  (firstline.indexOf("is")+2,firstline.lastIndexOf("with"));
+  let information = [];
   
-  let packageYear = firstline.substring(firstline.indexOf(" on")+4,firstline.indexOf("-"));
-  let packageMonth = firstline.substring(firstline.indexOf(packageYear)+5,firstline.lastIndexOf("-"));
+
+  let expiration;
+
+  while(text.includes('from')){
+  let line = text.substring(text.indexOf("from"),text.indexOf(";"));
+      
+  console.log(` line list  ${line} \n`);
+      
+  let package = line.substring(4,line.lastIndexOf("from"));
+
+  let remaining = line.substring
+  (line.indexOf("is")+2,line.lastIndexOf("with"));
   
-  let packageDay = firstline.substring(firstline.indexOf(packageMonth)+3,firstline.indexOf(packageMonth)+5);
+  let packageYear = line.substring(line.indexOf(" on")+4,line.indexOf("-"));
+  let packageMonth = line.substring(line.indexOf(packageYear)+5,line.lastIndexOf("-"));
   
-  let packageHour = firstline.substring(firstline.indexOf(" at ")+4,firstline.indexOf(":"));
-  let packageMinute = firstline.substring(firstline.indexOf(":")+1,firstline.lastIndexOf(":"));
-  let packageSecond = firstline.substring(firstline.lastIndexOf(":")+1,firstline.lastIndexOf(":")+3);
+  let packageDay = line.substring(line.indexOf(packageMonth)+3,line.indexOf(packageMonth)+5);
+  
+  let packageHour = line.substring(line.indexOf(" at ")+4,line.indexOf(":"));
+  let packageMinute = line.substring(line.indexOf(":")+1,line.lastIndexOf(":"));
+  let packageSecond = line.substring(line.lastIndexOf(":")+1,line.lastIndexOf(":")+3);
   
 
   let packageDate = `${packageYear}-${packageMonth}-${packageDay}T${packageHour}:${packageMinute}:${packageSecond}`;
-  let expiration = getTimeLeftUntil(packageDate);
+   expiration = getTimeLeftUntil(packageDate);
+   
 
+    let info = {"Package":package,"Remaining":remaining,"Expiraion":expiration};
+    information.push(info);
+  
+    text = text.substring(text.indexOf(";")+1)
+  }
+  
+  // console.log(JSON.stringify(information));
+  
+  let shortner ='';
+  for(let i =0;i<information.length;i++){
+    shortner+=`Package:${information[i].Package} \n Remaining: ${information[i].Remaining} \n Expiration : ${information[i].Expiraion} \n`
+  }
+  console.log('shorterr is' , shortner)
 
-  bot.sendMessage(chatId,`Package : ${package} \n Remaning : ${remaining} \n Expiration : ${expiration}`)
+  // console.log(`Package : ${package} \n Remaning : ${remaining} \n Expiration : ${expiration}`)
+  
+  bot.sendMessage(chatId,shortner)
+
  
-
 });
 
 
